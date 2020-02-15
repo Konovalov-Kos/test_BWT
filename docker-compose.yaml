@@ -1,0 +1,33 @@
+version: "3.0"
+services:
+  postgres:
+    image:  postgres:latest
+    restart: always
+    container_name: psgs
+    env_file:
+      - ".env"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - "./docker/postgres:/var/lib/postgresql/data:Z"
+
+  site:
+    container_name: mysite
+    restart: always
+    build: .
+    command: bash -c "python app.py"
+    ports:
+      - "127.0.0.1:5000:5000"
+    env_file:
+      - ".env"
+    environment:
+      - TZ=${TZ}
+      - C_FORCE_ROOT=1
+    depends_on:
+      - postgres
+
+    tty: true
+    volumes:
+      - .:/code
